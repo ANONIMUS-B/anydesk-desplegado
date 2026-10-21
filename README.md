@@ -60,3 +60,4 @@ Asegúrate de que el Security Group de tu EC2 tenga abierto:
 - **Puerto 22 (TCP):** SSH
 - **Puerto 3000 (TCP):** Servidor WebSocket / HTTP directo
 - **Puerto 80 / 443 (TCP):** Si configuras Nginx con dominio y SSL
+

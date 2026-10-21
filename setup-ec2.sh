@@ -22,3 +22,4 @@ echo "=========================================================="
 echo "✅ Servidor activo en el puerto 3000."
 echo "Prueba en tu navegador: http://TU_IP_EC2:3000/health"
 echo "=========================================================="
+
