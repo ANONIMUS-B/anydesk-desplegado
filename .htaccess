@@ -1,0 +1,22 @@
+# ====================================================================
+# Configuración Apache / cPanel para WebSocket y Node.js
+# ====================================================================
+
+# Redirigir a HTTPS
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Soporte de WebSocket Upgrade para proxies inversos de Apache
+  RewriteCond %{HTTP:Upgrade} =websocket [NC]
+  RewriteCond %{HTTP:Connection} upgrade [NC]
+  RewriteRule ^(.*)$ "ws://127.0.0.1:3000/$1" [P,L]
+</IfModule>
+
+# Desactivar buffer para transmisiones continuas de WebSocket
+<IfModule mod_proxy.c>
+  ProxyPreserveHost On
+  ProxyRequests Off
+</IfModule>
+
