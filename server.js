@@ -273,6 +273,10 @@ wss.on('connection', (ws, req) => {
 
         const peer = findDevice(msg.targetId);
         if (peer && peer.ws.readyState === 1) {
+          // Si el receptor tiene más de 32 KB en cola de red, descartar frame obsoleto para evitar cámara lenta
+          if (msg.type === 'screen_frame' && peer.ws.bufferedAmount > 32 * 1024) {
+            return;
+          }
           peer.ws.send(JSON.stringify({ ...msg, from: devId }));
         }
       }
