@@ -1,25 +1,18 @@
 #!/usr/bin/env bash
-# Script de Despliegue Rápido en AWS EC2 (Ubuntu 22.04 / 24.04 LTS)
-set -e
-
-echo "=== [1/4] Actualizando paquetes del sistema ==="
-sudo apt-get update -y
-
-echo "=== [2/4] Instalando Node.js 20 LTS ==="
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs build-essential
-
-echo "=== [3/4] Instalando dependencias del proyecto y PM2 ==="
-npm install
-sudo npm install -g pm2
-
-echo "=== [4/4] Iniciando el Servidor de Señalización con PM2 ==="
-pm2 start ecosystem.config.js
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+export PATH=/opt/jbremote-node/bin:$PATH
+node -e 'if (Number(process.versions.node.split(".")[0]) < 24) throw new Error("Node.js 24 LTS is required in /opt/jbremote-node")'
+npm ci --omit=dev --no-fund
+npm test
+node install-release.cjs
+if pm2 describe jbdesk-server >/dev/null 2>&1; then
+  pm2 restart ecosystem.config.js --update-env
+else
+  pm2 start ecosystem.config.js
+fi
 pm2 save
-pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
-
-echo "=========================================================="
-echo "✅ Servidor activo en el puerto 3000."
-echo "Prueba en tu navegador: http://TU_IP_EC2:3000/health"
-echo "=========================================================="
-
+sudo env PATH="$PATH" pm2 startup systemd -u "$(id -un)" --hp "$HOME"
+curl --fail --silent http://127.0.0.1:3001/health
+# Provision TLS first; apply nginx.conf after reviewing the existing virtual hosts.
+# Do not reset the repository or overwrite other sites from this script.

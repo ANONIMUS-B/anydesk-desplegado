@@ -5,3 +5,13 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+
+*.exe
+*.apk
+*.pem
+*.jks
+*.keystore
+data/
+public/*.pdf
+*.download
+

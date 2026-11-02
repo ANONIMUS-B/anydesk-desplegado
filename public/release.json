@@ -1,0 +1,19 @@
+{
+  "version": "1.1.0",
+  "protocol": 2,
+  "endpoint": "wss://jbdesk.18.117.163.80.sslip.io",
+  "assets": [
+    {
+      "name": "JBRemote.exe",
+      "bytes": 110208163,
+      "sha256": "3e8f2cb727f624afb47bb5c112fb2fee03c6a7821368f2bb765cc4f544059331",
+      "url": "https://github.com/ANONIMUS-B/anydesk-desplegado/releases/download/v1.1.0/JBRemote.exe"
+    },
+    {
+      "name": "JBRemote.apk",
+      "bytes": 3169643,
+      "sha256": "b5beea94652c4bb155a71c3c51b7e66c8a957af61322908927823c838e61ae74",
+      "url": "https://github.com/ANONIMUS-B/anydesk-desplegado/releases/download/v1.1.0/JBRemote.apk"
+    }
+  ]
+}

@@ -1,63 +1,22 @@
-# JBDesk Signaling & Relay Server — AWS EC2
+# JBRemote 1.1.0 — AWS EC2
 
-Servidor central de señalización WebSocket y retransmisión en tiempo real para control remoto estilo AnyDesk.
+Servidor: https://jbdesk.18.117.163.80.sslip.io — WebSocket: wss://jbdesk.18.117.163.80.sslip.io
 
----
+Node.js 24 LTS en `/opt/jbremote-node`, una instancia PM2 en modo fork y backend privado `127.0.0.1:3001`. Nginx termina TLS en 443. El puerto antiguo 3000 solo redirige HTTP a HTTPS. El virtual host de Laravel se conserva.
 
-## 🚀 Despliegue Rápido en AWS EC2 (Ubuntu 22.04 / 24.04 LTS)
+El protocolo 2 requiere los clientes 1.1.0. Cada instalación genera su propia clave; los hashes de identidad se guardan fuera del checkout en `/home/ubuntu/.local/share/jbremote/identities.json`. Respaldar ese directorio con permisos restringidos. Perderlo elimina la reserva de identidades. No copiar claves de un cliente a otro.
 
-### Paso 1: Clonar este repositorio en tu instancia EC2
-```bash
-git clone https://github.com/ANONIMUS-B/anydesk-desplegado.git
-cd anydesk-desplegado
-```
+`/health` es público. `/api/devices` requiere un `ADMIN_TOKEN` configurado en el entorno y enviado como Bearer; sin token está deshabilitado. No publicar `.env`, identidades, informes internos ni llaves en `public/`.
 
-### Paso 2: Ejecutar el instalador automático
-```bash
-chmod +x setup-ec2.sh
-./setup-ec2.sh
-```
+## Actualización
 
-El script se encargará de instalar Node.js 20, dependencias, PM2 y arrancar el servidor en el puerto 3000 con reinicio automático ante caídas.
+1. Comprobar espacio libre, sesiones y cambios locales. Descargar los artefactos firmados Android y portable Windows de la release y verificar `release.json`.
+2. Usar `git pull --ff-only`. Conservar configuración local y backups fuera del repositorio. No usar `git reset --hard`.
+3. Ejecutar `./setup-ec2.sh`. El reinicio termina sesiones existentes; actualizar en una ventana de mantenimiento.
+4. Verificar `/health`, descargas, autorización y reconexión desde fuera de EC2. La aplicación no soporta varios workers sin coordinación de sesiones.
 
----
+## Operación
 
-## 🛠️ Ejecución Manual (Alternativa)
-```bash
-npm install
-PORT=3000 node server.js
-```
+`systemctl status pm2-ubuntu` verifica arranque al reiniciar. `systemctl list-timers certbot.timer` verifica renovación TLS. `certbot renew --dry-run` valida la renovación. Rotar logs, alertar por disco >85 % y memoria. El nombre sslip.io depende de esa IP: mantener IP estable y migrar a un dominio propio al configurar DNS.
 
-O en segundo plano con PM2:
-```bash
-sudo npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 save
-```
-
----
-
-## 🌐 Comprobar Funcionamiento
-Abre en tu navegador o mediante curl:
-```bash
-curl http://localhost:3000/health
-```
-Respuesta esperada:
-```json
-{
-  "status": "online",
-  "service": "JBRemote Enterprise Cloud Engine (cPanel)",
-  "version": "1.0.0",
-  "devices_online": 0,
-  "active_sessions": 0
-}
-```
-
----
-
-## 🔒 Reglas de Seguridad en AWS (Inbound Rules)
-Asegúrate de que el Security Group de tu EC2 tenga abierto:
-- **Puerto 22 (TCP):** SSH
-- **Puerto 3000 (TCP):** Servidor WebSocket / HTTP directo
-- **Puerto 80 / 443 (TCP):** Si configuras Nginx con dominio y SSL
-
+La transferencia de archivos tiene un límite explícito de 4 MiB. WebRTC usa STUN con alternativa JPEG por WSS; redes restrictivas pueden usar la alternativa. No se promete 60 FPS ni disponibilidad del escritorio seguro/UAC. Windows portable no es un servicio de sistema.
